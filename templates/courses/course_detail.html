@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ course.title }} - AptCourses{% endblock %}
+
+{% block content %}
+<section class="hero" style="min-height: 60vh; padding-top: 100px;">
+    <div style="max-width: 800px; text-align: left; align-self: flex-start; margin: 0 auto; width: 100%;">
+        <div class="course-category" style="margin-bottom: var(--spacing-sm); font-size: 1rem;">
+            {{ course.category.name|default:"Uncategorized" }}
+        </div>
+        <h1 style="text-align: left; font-size: 3.5rem; margin-bottom: var(--spacing-md);">{{ course.title }}</h1>
+        <p style="text-align: left; max-width: 100%; font-size: 1.2rem;">{{ course.overview }}</p>
+        
+        <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg); align-items: center;">
+            <span class="course-price" style="font-size: 2rem;">${{ course.price }}</span>
+            <a href="{% url 'course_learn' course.id %}" class="btn btn-primary">Enroll Now</a>
+        </div>
+        
+        <div style="display: flex; gap: var(--spacing-lg); margin-top: var(--spacing-xl); color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.1); padding-top: var(--spacing-md);">
+            <div><strong>Skill Level:</strong> {{ course.skill_level }}</div>
+            <div><strong>Duration:</strong> {{ course.duration }}</div>
+            <div><strong>Access:</strong> {{ course.get_permission_type_display }}</div>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="max-width: 800px; margin: 0 auto;">
+    <div class="glass-panel" style="padding: var(--spacing-xl); margin-top: -50px; position: relative; z-index: 10;">
+        
+        <h2 style="margin-bottom: var(--spacing-md);">Course Syllabus</h2>
+        <div style="white-space: pre-line; color: var(--text-secondary); margin-bottom: var(--spacing-xl); line-height: 1.8;">
+            {{ course.syllabus }}
+        </div>
+        
+        <h2 style="margin-bottom: var(--spacing-md);">Learning Outcomes</h2>
+        <div style="color: var(--text-secondary); margin-bottom: var(--spacing-xl); line-height: 1.8;">
+            {{ course.outcomes }}
+        </div>
+        
+        {% if course.prerequisites %}
+        <h2 style="margin-bottom: var(--spacing-md);">Prerequisites</h2>
+        <div style="color: var(--text-secondary); line-height: 1.8;">
+            {{ course.prerequisites }}
+        </div>
+        {% endif %}
+        
+    </div>
+</section>
+{% endblock %}

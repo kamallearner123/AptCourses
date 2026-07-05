@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="hero">
+    <h1>Master the Future of Mobility</h1>
+    <p>Affordable, deep-tech engineering courses designed to be easy to understand and immediately applicable in practice. Each topic is carefully tailored and gamified to keep you engaged as you master V2X, Embedded Systems, and AI.</p>
+    <div class="hero-actions">
+        <a href="#catalog" class="btn btn-primary">Explore Catalog</a>
+        <a href="#corporate" class="btn btn-outline">Corporate Training</a>
+    </div>
+</section>
+
+<section id="catalog" class="section">
+    <div class="section-header">
+        <h2>Featured Courses</h2>
+        <p>Start your journey with our top-rated engineering pathways.</p>
+    </div>
+    <div class="course-grid">
+        {% for course in courses %}
+        <div class="course-card glass-panel">
+            <div class="course-image" style="height: 180px; overflow: hidden; border-radius: 8px; margin-bottom: var(--spacing-md);">
+                <img src="{% static 'images/embedded_cover.png' %}" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div class="course-category">{{ course.category.name|default:"Uncategorized" }}</div>
+            <h3 class="course-title">{{ course.title }}</h3>
+            <div class="course-meta">
+                <span>{{ course.skill_level }}</span>
+                <span>{{ course.duration }}</span>
+            </div>
+            <div class="course-footer">
+                <span class="course-price">${{ course.price }}</span>
+                <a href="{% url 'course_detail' course.id %}" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">View Course</a>
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary);">
+            No courses found. Check back later!
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Learning {{ course.title }} - AptCourses{% endblock %}
+
+{% block content %}
+<div style="display: flex; height: calc(100vh - 80px); overflow: hidden; margin-top: 80px;">
+    
+    <!-- Sidebar -->
+    <aside class="glass-panel" style="width: 350px; padding: var(--spacing-md); border-radius: 0; border-top: none; border-left: none; border-bottom: none; overflow-y: auto;">
+        <h3 style="color: var(--primary-color); margin-bottom: var(--spacing-md); font-size: 1.1rem;">{{ course.title }}</h3>
+        
+        <div style="margin-bottom: var(--spacing-lg);">
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: var(--spacing-sm); text-transform: uppercase; letter-spacing: 1px;">Course Modules</div>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                {% for module in modules %}
+                <details {% if current_lesson and current_lesson.module.id == module.id %}open{% endif %} style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;">
+                    <summary style="font-size: 0.95rem; color: var(--text-primary); font-weight: 600; cursor: pointer; padding: 0.25rem 0;">
+                        {{ module.title }}
+                    </summary>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.5rem; margin-left: 1rem;">
+                        {% for lesson in module.lessons.all %}
+                        <li style="border-radius: 4px; overflow: hidden;">
+                            <a href="{% url 'course_learn_lesson' course.id lesson.id %}" style="display: block; padding: 0.5rem; font-size: 0.9rem;
+                                {% if current_lesson and current_lesson.id == lesson.id %}
+                                background: rgba(0, 240, 255, 0.1); border-left: 3px solid var(--primary-color); color: var(--text-primary);
+                                {% else %}
+                                border-left: 3px solid transparent; color: var(--text-secondary);
+                                {% endif %}
+                                transition: background 0.2s;"
+                                {% if current_lesson and current_lesson.id == lesson.id %}id="active-lesson-link"{% endif %}>
+                                {{ lesson.title }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </details>
+                {% endfor %}
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main style="flex: 1; padding: var(--spacing-xl) var(--spacing-md); overflow-y: auto;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            {% if current_lesson %}
+        
+        <h1 style="font-size: 2.5rem; margin-bottom: var(--spacing-lg);">{{ current_lesson.title }}</h1>
+        
+        {% if current_lesson.explanation_html %}
+        <div class="content-section" style="margin-bottom: var(--spacing-xl); line-height: 1.8;">
+            {{ current_lesson.explanation_html|safe }}
+        </div>
+        {% endif %}
+        
+        {% if current_lesson.challenges_html %}
+        <div class="glass-panel" style="padding: var(--spacing-lg); margin-bottom: var(--spacing-xl); border-color: var(--secondary-color);">
+            <h2 style="color: var(--secondary-color); margin-bottom: var(--spacing-md);">Challenges</h2>
+            <div style="line-height: 1.8;">
+                {{ current_lesson.challenges_html|safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if current_lesson.assignments_html %}
+        <div class="glass-panel" style="padding: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+            <h2 style="color: var(--primary-color); margin-bottom: var(--spacing-md);">Assignments</h2>
+            <div style="line-height: 1.8;">
+                {{ current_lesson.assignments_html|safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if current_lesson.mcqs_html %}
+        <div class="glass-panel" style="padding: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+            <h2 style="margin-bottom: var(--spacing-md);">Knowledge Check (MCQs)</h2>
+            <div style="line-height: 1.8;">
+                {{ current_lesson.mcqs_html|safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div style="margin-top: var(--spacing-xl); display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: var(--spacing-lg);">
+            <a href="#" class="btn btn-outline" style="opacity: 0.5; pointer-events: none;">Previous Lesson</a>
+            <a href="#" class="btn btn-primary">Complete & Continue -></a>
+        </div>
+        
+        {% else %}
+        <div style="text-align: center; color: var(--text-secondary); margin-top: 20vh;">
+            <h2>No lessons available yet.</h2>
+            <p>Please check back later.</p>
+        </div>
+        {% endif %}
+        </div>
+        
+        <!-- Scroll to Top Button -->
+        <button id="scrollToTopBtn" style="position: fixed; bottom: 30px; right: 30px; background: var(--bg-card); color: var(--primary-color); border: 1px solid var(--primary-color); border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer; display: none; box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2); transition: all 0.3s ease; z-index: 1000;" title="Go to top">
+            ↑
+        </button>
+    </main>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Scroll to Top Logic
+        const mainArea = document.querySelector('main');
+        const topBtn = document.getElementById('scrollToTopBtn');
+        
+        mainArea.addEventListener('scroll', () => {
+            if (mainArea.scrollTop > 300) {
+                topBtn.style.display = 'block';
+            } else {
+                topBtn.style.display = 'none';
+            }
+        });
+        
+        topBtn.addEventListener('click', () => {
+            mainArea.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Auto-scroll sidebar to the active lesson
+        const activeLink = document.getElementById('active-lesson-link');
+        if (activeLink) {
+            activeLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Select all list items inside the Challenges and MCQs glass panels
+        const challengeItems = document.querySelectorAll('.glass-panel h2:contains("Challenges") ~ div li, h2:contains("Challenges") + div li');
+        // Since :contains isn't standard JS, we'll do it safely:
+        
+        const panels = document.querySelectorAll('.glass-panel');
+        panels.forEach(panel => {
+            const heading = panel.querySelector('h2');
+            if (heading && (heading.innerText.includes('Challenges') || heading.innerText.includes('MCQs') || heading.innerText.includes('Knowledge Check'))) {
+                const listItems = panel.querySelectorAll('li');
+                listItems.forEach(li => {
+                    // Only add if we haven't already
+                    if (!li.querySelector('.interactive-form')) {
+                        const formDiv = document.createElement('div');
+                        formDiv.className = 'interactive-form';
+                        formDiv.style.marginTop = '10px';
+                        formDiv.style.marginBottom = '20px';
+                        
+                        const textarea = document.createElement('textarea');
+                        textarea.placeholder = "Type your answer here...";
+                        textarea.style.width = "100%";
+                        textarea.style.minHeight = "60px";
+                        textarea.style.background = "rgba(0,0,0,0.3)";
+                        textarea.style.border = "1px solid rgba(0,240,255,0.2)";
+                        textarea.style.color = "#fff";
+                        textarea.style.padding = "10px";
+                        textarea.style.borderRadius = "8px";
+                        textarea.style.fontFamily = "var(--font-mono)";
+                        textarea.style.resize = "vertical";
+                        
+                        const validateBtn = document.createElement('button');
+                        validateBtn.innerText = "Validate Answer";
+                        validateBtn.className = "btn btn-outline";
+                        validateBtn.style.marginTop = "8px";
+                        validateBtn.style.padding = "6px 12px";
+                        validateBtn.style.fontSize = "0.85rem";
+                        
+                        const feedbackDiv = document.createElement('div');
+                        feedbackDiv.style.marginTop = "10px";
+                        feedbackDiv.style.display = "none";
+                        feedbackDiv.style.padding = "10px";
+                        feedbackDiv.style.borderRadius = "8px";
+                        feedbackDiv.style.fontSize = "0.9rem";
+                        
+                        validateBtn.onclick = function() {
+                            if (textarea.value.trim() === "") {
+                                feedbackDiv.style.display = "block";
+                                feedbackDiv.style.background = "rgba(255, 0, 127, 0.1)";
+                                feedbackDiv.style.borderLeft = "3px solid var(--secondary-color)";
+                                feedbackDiv.innerHTML = "❌ Please enter an answer before validating.";
+                                return;
+                            }
+                            
+                            validateBtn.innerText = "Validating...";
+                            validateBtn.disabled = true;
+                            
+                            // Simulate network delay for AI evaluation
+                            setTimeout(() => {
+                                validateBtn.innerText = "Validated ✓";
+                                feedbackDiv.style.display = "block";
+                                feedbackDiv.style.background = "rgba(0, 240, 255, 0.1)";
+                                feedbackDiv.style.borderLeft = "3px solid var(--primary-color)";
+                                feedbackDiv.innerHTML = "✅ <strong>Evaluation complete.</strong> Your response has been recorded.";
+                                
+                                // If there's a hidden details/summary (from Rule 3), open it automatically!
+                                const details = li.querySelector('details');
+                                if (details) {
+                                    details.open = true;
+                                    feedbackDiv.innerHTML += "<br><em>Compare your answer with the correct explanation below.</em>";
+                                }
+                            }, 800);
+                        };
+                        
+                        formDiv.appendChild(textarea);
+                        formDiv.appendChild(validateBtn);
+                        formDiv.appendChild(feedbackDiv);
+                        
+                        // Insert the form right after the question text, before any hidden <details>
+                        const detailsNode = li.querySelector('details');
+                        if (detailsNode) {
+                            li.insertBefore(formDiv, detailsNode);
+                        } else {
+                            li.appendChild(formDiv);
+                        }
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
